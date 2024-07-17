@@ -1,0 +1,12 @@
+version: '3.9'
+services:
+  buildev2:
+    container_name: buildev2
+    expose:
+    - "4200:4200"
+    build: 
+      context: .
+      args:
+        DOCKER_USER: dev
+        NOD_VERSION_REACT: 16.19.1
+        NOD_VERSION_ANGULAR: 20.10.0
