@@ -13,6 +13,7 @@ RUN usermod -g sudo -G $DOCKER_USER $DOCKER_USER
 
 # Update and install dependencies
 RUN yum -y update && yum clean all
+RUN yum install -y git
 
 # Install Node Version Manager
 RUN touch ~/.bashrc && chmod +x ~/.bashrc
