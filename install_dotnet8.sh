@@ -8,8 +8,8 @@ sudo apt install dotnet-sdk-8.0
 
 # Install Entity Framework
 dotnet tool install --global dotnet-ef
-export PATH=/root/.dotnet/tools:$PATH; source .bashrc
-export PATH=$HOME/.dotnet/tools:$PATH; source .bashrc
+export PATH=/root/.dotnet/tools:$PATH; source ~/.bashrc
+export PATH=$HOME/.dotnet/tools:$PATH; source ~/.bashrc
 
 # Install a package like this from CLI
 #dotnet add package Microsoft.EntityFrameworkCore.SqlServer
