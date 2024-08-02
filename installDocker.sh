@@ -14,7 +14,10 @@ echo \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
 sudo apt-get install docker.io -y
+sudo apt install docker-compose -y
 
 # Allow docker to run without sudo
 sudo groupadd docker
 sudo gpasswd -a $USER docker
+
+sudo apt autoremove -y
