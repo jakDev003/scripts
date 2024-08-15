@@ -1,20 +1,10 @@
 #!/bin/bash
 
-# containers
-docker container stop $(docker container ls -aq)
-docker container rm $(docker container ls -aq)
+# stop and remove all containers (ignoring portainer)
+docker stop $(docker ps -a | grep -v "portainer" | awk 'NR>1 {print $1}')
 
-# images
-docker rmi -f $(docker images -q)
-
-# volumes
-docker volume rm -f $(docker volume ls -q)
-
-# networks
-docker network rm -f $(docker network ls -q)
-
-# anything else
+# remove all unused containers, networks, images, and optionally volumes
 docker system prune --all --force --volumes
 
-
-
+# remove volumes that remain
+docker volume rm $(docker volume ls -q --filter dangling=true)
