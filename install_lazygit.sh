@@ -1,14 +1,20 @@
 #!/bin/bash
 
+VERSION=1.19.5
+
 # Add dependencies
 sudo dnf check-update
 sudo dnf install dnf-utils
 
 # Pull Go Tarball
-wget https://go.dev/dl/go1.19.5.linux-amd64.tar.gz
+wget https://go.dev/dl/go$VERSION.linux-amd64.tar.gz
 
 # Extract to /usr/local
-tar -zxvf go1.19.5.linux-amd64.tar.gz -C /usr/local
+sudo tar -zxvf go$VERSION.linux-amd64.tar.gz -C /usr/local
+
+# Remove Tarball
+rm -rf ./go$VERSION.linux-amd64.tar.gz
+
 
 # Export to .bashrc
 echo 'export GOROOT=/usr/local/go' | tee -a /home/dev/.bashrc
@@ -21,4 +27,6 @@ source /home/dev/.bashrc
 git clone https://github.com/jesseduffield/lazygit.git
 cd lazygit
 go install
+cd ..
+rm -rf lazygit/
 
