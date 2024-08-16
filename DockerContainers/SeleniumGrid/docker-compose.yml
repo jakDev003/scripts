@@ -3,7 +3,7 @@
 # To stop the execution, hit Ctrl+C, and then `docker-compose -f docker-compose-v3-seleniumgrid-m2.yml down`
 services:
   chrome:
-    image: seleniarm/node-chromium:latest
+    image: selenium/node-chromium:latest
     shm_size: 2gb
     depends_on:
       - selenium-hub
@@ -16,7 +16,7 @@ services:
   #      - SE_NODE_SESSION_TIMEOUT=180
 
   firefox:
-    image: seleniarm/node-firefox:latest
+    image: selenium/node-firefox:latest
     shm_size: 2gb
     depends_on:
       - selenium-hub
@@ -42,7 +42,7 @@ services:
   #      - SE_NODE_SESSION_TIMEOUT=180
 
   selenium-hub:
-    image: seleniarm/hub:latest
+    image: selenium/hub:latest
     container_name: selenium-hub
     ports:
       - "4442:4442"
