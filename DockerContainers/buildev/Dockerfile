@@ -37,9 +37,6 @@ RUN wget -O - http://www.swftools.org/swftools-$SWF_VERSION.tar.gz | tar -xzf -
 RUN yum -y install java-$JDK_VERSION-openjdk-devel
 RUN wget -O - https://archive.apache.org/dist/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz | tar -xzf -
 
-## get node
-#RUN wget -O - https://nodejs.org/dist/v$NOD_VERSION/node-v$NOD_VERSION-linux-x64.tar.xz | xz -dc | tar -xvf -
-
 # Install Node Version Manager
 RUN touch ~/.bashrc && chmod +x ~/.bashrc
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
@@ -59,18 +56,11 @@ ENV PATH=$PATH:$JAVA_HOME:$MAVEN_HOME:$NODE_HOME
 ENV jenkins.output=/home/flex
 ENV SKIP_PREFLIGHT_CHECK=true
 
-## install node things
-#RUN npm install --global yarn cross-env webpack webpack-cli url-loader dotenv
-## we may need this: RUN npm install --global webpack-dev-server
-
-#RUN yarn global add lerna@7.4.2
-
-#RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org pip setuptools
-#RUN pip install dotenv
-
+# Add environment content
 RUN mkdir env
 COPY content/env /env/.env
 
+# Set up Sudoers
 RUN echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN ssh-keygen -A
 RUN echo "${USER_NAME}:password" | chpasswd
@@ -111,11 +101,4 @@ LABEL net.wealth-agreementexpress.build_user=${BUILD_USER}
 LABEL net.wealth-agreementexpress.build_user=${BUILD_DIR}
 LABEL net.wealth-agreementexpress.build_time=${BUILD_TIME}
 
-# Install Starship
-RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
-
-# Install Cargo
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-
-WORKDIR "/home/${USER_NAME}"
 
