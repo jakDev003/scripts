@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    volumes:
+      - ./home_dev:/home/dev/code
+    ports:
+      - "22:22"
+    container_name: buildev_jak
