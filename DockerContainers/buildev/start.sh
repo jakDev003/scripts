@@ -2,7 +2,7 @@
 
 docker compose down
 
-docker image rm buildev_jak
+#docker image rm buildev_jak
 
 docker compose up -d --build --force-recreate
 

@@ -2,7 +2,30 @@ services:
   app:
     build: .
     volumes:
-      - ./home_dev:/home/dev/code
+      - ./home_dev:/home/josh/
     ports:
       - "22:22"
+    networks:
+      - postgres-network
     container_name: buildev_jak
+  database:
+    image: 'postgres:16-alpine'
+    container_name: postgres_db
+    shm_size: 128mb
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+    networks:
+      - postgres-network
+    volumes:
+      - pgdb:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+ 
+networks: 
+  postgres-network:
+    driver: bridge
+
+volumes:
+  pgdb:
