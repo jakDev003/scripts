@@ -13,6 +13,7 @@ services:
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
       - SE_NODE_MAX_INSTANCES=2
       - SE_NODE_MAX_SESSIONS=2
+      - SE_VNC_PASSWORD=password
   #      - SE_NODE_SESSION_TIMEOUT=180
 
   firefox:
@@ -24,8 +25,9 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - SE_NODE_MAX_INSTANCES=1
-      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_MAX_INSTANCES=2
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_VNC_PASSWORD=password
   #      - SE_NODE_SESSION_TIMEOUT=180
 
   edge:
@@ -37,9 +39,47 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      - SE_NODE_MAX_INSTANCES=1
-      - SE_NODE_MAX_SESSIONS=1
+      - SE_NODE_MAX_INSTANCES=2
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_VNC_PASSWORD=password
   #      - SE_NODE_SESSION_TIMEOUT=180
+
+  chrome_video:
+    image: selenium/video:ffmpeg-7.0.1-20240813
+    volumes:
+      - ./tmp/videos:/videos
+    depends_on:
+      - chrome
+    environment:
+      - DISPLAY_CONTAINER_NAME=chrome
+      - SE_NODE_GRID_URL=http://selenium-hub:4444
+#      - FILE_NAME=chrome_video.mp4
+      - SE_VIDEO_FILE_NAME=auto
+
+  edge_video:
+    image: selenium/video:ffmpeg-7.0.1-20240813
+    volumes:
+      - ./tmp/videos:/videos
+    depends_on:
+      - edge
+    environment:
+      - DISPLAY_CONTAINER_NAME=edge
+      - SE_NODE_GRID_URL=http://selenium-hub:4444
+#      - FILE_NAME=edge_video.mp4
+      - SE_VIDEO_FILE_NAME=auto
+
+  firefox_video:
+    image: selenium/video:ffmpeg-7.0.1-20240813
+    volumes:
+      - ./tmp/videos:/videos
+    depends_on:
+      - firefox
+    environment:
+      - DISPLAY_CONTAINER_NAME=firefox
+      - SE_NODE_GRID_URL=http://selenium-hub:4444
+#      - FILE_NAME=firefox_video.mp4
+      - SE_VIDEO_FILE_NAME=auto
+
 
   selenium-hub:
     image: selenium/hub:latest

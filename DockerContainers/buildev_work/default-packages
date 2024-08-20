@@ -2,8 +2,13 @@ webpack
 webpack-cli
 dotenv
 prettier
+url-loader
+cross-env
+yarn
 @angular/cli
-@angular/cli
+vscode-langservers-extracted
+emmet-ls
+typescript
 cspell
 typescript-language-server
 yaml-language-server

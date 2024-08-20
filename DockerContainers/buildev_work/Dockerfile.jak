@@ -68,15 +68,7 @@ ARG NVM_DIR=/usr/local/nvm
 RUN mkdir -p ${NVM_DIR}
 ENV NVM_DIR ${NVM_DIR}
 ENV NODE_VERSION v16.17.0
-RUN touch ${NVM_DIR}/default-packages \
-  && echo "yarn" >> ${NVM_DIR}/default-packages \
-  && echo "cross-env" >> ${NVM_DIR}/default-packages \
-  && echo "webpack" >> ${NVM_DIR}/default-packages \
-  && echo "webpack-cli" >> ${NVM_DIR}/default-packages \
-  && echo "url-loader" >> ${NVM_DIR}/default-packages \
-  && echo "dotenv" >> ${NVM_DIR}/default-packages \
-  && echo "prettier" >> ${NVM_DIR}/default-packages
-  #&& echo "@angular/cli" >> ${NVM_DIR}/default-packages
+COPY default-packages /usr/local/nvm/
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
 # add node and npm to the PATH
