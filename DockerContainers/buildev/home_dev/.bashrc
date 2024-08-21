@@ -151,7 +151,7 @@ kernalname () {
 }
 
 distribution_description () {
-    lsb_release -a
+    command echo "Distribution: $(cat /etc/issue.net)" || echo "$(lsb_release -a)"
 }
 
 alias vi="vim"
