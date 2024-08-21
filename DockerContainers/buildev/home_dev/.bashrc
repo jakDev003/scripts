@@ -151,8 +151,9 @@ kernalname () {
 }
 
 distribution_description () {
-    command echo "Distribution: $(cat /etc/issue.net)" || echo "$(lsb_release -a)"
+    command echo "$(grep -E -w 'VERSION|NAME|PRETTY_NAME' /etc/os-release)" || echo "Distribution: $(cat /etc/issue.net)" || echo "$(lsb_release -a)"
 }
+
 
 alias vi="vim"
 
