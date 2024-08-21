@@ -99,6 +99,12 @@ RUN rm -rf helix.tar.xz
 RUN curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb
 RUN sudo dpkg -i ripgrep_14.1.0-1_amd64.deb
 
+# Install JDTLS
+RUN wget -qO jdt-language-server-latest.tar.gz https://www.eclipse.org/downloads/download.php?file=/jdtls/snapshots/jdt-language-server-latest.tar.gz
+RUN sudo mkdir /opt/jdtls
+RUN sudo tar xf jdt-language-server-latest.tar.gz -C /opt/jdtls
+RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
+
 # Install dotnet
 RUN sudo add-apt-repository ppa:dotnet/backports
 RUN sudo apt update
