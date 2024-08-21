@@ -118,17 +118,40 @@ fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-# Custom Info
-manufacturer () {
-    command lscpu | grep "Model name"
+# Utilities
+trimstring () {
+    string=$1
+    trimmed_string=$string
+    if [[ $2 -eq 1 ]]; then
+        # trim start
+        trimmed_string="${string#"${string%%[![:space:]]*}"}"
+    elif [[ $2 -eq 2 ]]; then
+        # trim end
+        trimmed_string="${string%"${string##*[![:space:]]}"}"
+    elif [[ $2 -eq 3 ]]; then
+        # trim start and end
+        trimmed_string="${string#"${string%%[![:space:]]*}"}"
+        trimmed_string="${trimmed_string%"${trimmed_string##*[![:space:]]}"}"
+    fi
+    echo $trimmed_string
 }
 
+# Custom Info
+manufacturer () {
+    echo "Model:    $(command lscpu | grep 'Model name' | cut -f 2 -d ":" | awk '{$1=$1}1')"
+}
+
+
 username () {
-    command uname
+    echo "Username: $(command whoami)"
 }
 
 kernalname () {
-    command uname -r
+    echo "Kernal:   $(command uname -r)"
+}
+
+distribution_description () {
+    lsb_release -a
 }
 
 alias vi="vim"
@@ -155,9 +178,6 @@ export M2_HOME=/usr/local/apache-maven
 export M2=$M2_HOME/bin
 export PATH=$M2:$PATH
 
-#neofetch
-#fastfetch
-
 . "$HOME/.cargo/env"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
@@ -165,4 +185,5 @@ export PATH=$M2:$PATH
 username
 manufacturer
 kernalname
+distribution_description
 
