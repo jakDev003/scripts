@@ -111,7 +111,7 @@ RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
 # Install dotnet
 RUN sudo add-apt-repository ppa:dotnet/backports
 RUN sudo apt update
-RUN sudo apt install dotnet-sdk-8.0 -y
+RUN sudo apt install dotnet-sdk-6.0 -y
 RUN dotnet --version
 
 # Install Entity Framework
