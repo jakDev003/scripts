@@ -130,10 +130,8 @@ RUN sudo apt install mono-complete -y
 RUN mono --version
 
 # Install Omnisharp LSP
-ARG OMNISHARP_VER=0.19.8
-RUN wget -qO csharp-language-server-protocol.tar.gz "https://github.com/OmniSharp/csharp-language-server-protocol/archive/refs/tags/v$OMNISHARP_VER.tar.gz"
-RUN sudo tar xf csharp-language-server-protocol.tar.gz
-RUN cd csharp-language-server-protocol-$OMNISHARP_VER/ && sh build.sh
+RUN wget https://github.com/OmniSharp/omnisharp-roslyn/releases/download/v1.39.12/omnisharp-linux-x64-net6.0.tar.gz
+RUN cd omnisharp-roslyn/ && sh build.sh
 
 
 # Avoid container exit.
