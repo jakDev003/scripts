@@ -3,7 +3,6 @@ webpack-cli
 dotenv
 prettier
 @angular/cli
-@angular/cli
 cspell
 typescript-language-server
 yaml-language-server

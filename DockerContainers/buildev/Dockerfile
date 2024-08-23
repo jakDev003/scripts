@@ -20,6 +20,9 @@ RUN sudo apt-get install -y -q --no-install-recommends \
         apt-transport-https \
         build-essential \
         ca-certificates \
+        software-properties-common \
+        dirmngr \
+        gnupg \
         curl \
         git \
         libssl-dev \
@@ -56,7 +59,7 @@ ENV NODE_VERSION v20.16.0
 RUN sudo chown $USER_NAME ${NVM_DIR}/ -R
 COPY default-packages /usr/local/nvm/
 RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
+RUN /bin/bash -c "source $NVM_DIR/nvm.sh"
 # add node and npm to the PATH
 ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/bin
 ENV PATH $NODE_PATH:$PATH
@@ -108,22 +111,29 @@ RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
 # Install dotnet
 RUN sudo add-apt-repository ppa:dotnet/backports
 RUN sudo apt update
-RUN sudo apt install software-properties-common -y
 RUN sudo apt install dotnet-sdk-8.0 -y
+RUN dotnet --version
 
 # Install Entity Framework
-RUN dotnet tool install --global dotnet-ef
+RUN dotnet tool install --global dotnet-ef --version 6.0.6
 ENV PATH="${HOME_DIR}/.dotnet/tools:${PATH}"
 RUN export PATH=$HOME_DIR/.dotnet/tools:$PATH; source $HOME_DIR/.bashrc
 
 # Install a package like this from CLI
 #dotnet add package Microsoft.EntityFrameworkCore.SqlServer
 
+# Install Mono (Needed for Omnisharp)
+RUN sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF \
+  && echo "deb [arch=amd64] https://download.mono-project.com/repo/ubuntu stable-focal main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+RUN sudo apt update
+RUN sudo apt install mono-complete -y
+RUN mono --version
+
 # Install Omnisharp LSP
-#RUN export OMNISHARP_LSP_VERSION=$(curl -s "https://github.com/OmniSharp/csharp-language-server-protocol/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
-#  && wget -qO omnisharplsp.tar.xz https://github.com/OmniSharp/csharp-language-server-protocol/archive/refs/tags/$OMNISHARP_LSP_VERSION.tar.gz
-#RUN sudo tar xf omnisharplsp.tar.xz
-#RUN cd csharp-language-server-protocol-$OMNISHARP_LSP_VERSION/ && sh build.sh
+ARG OMNISHARP_VER=0.19.8
+RUN wget -qO csharp-language-server-protocol.tar.gz "https://github.com/OmniSharp/csharp-language-server-protocol/archive/refs/tags/v$OMNISHARP_VER.tar.gz"
+RUN sudo tar xf csharp-language-server-protocol.tar.gz
+RUN cd csharp-language-server-protocol-$OMNISHARP_VER/ && sh build.sh
 
 
 # Avoid container exit.

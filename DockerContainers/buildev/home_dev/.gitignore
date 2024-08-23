@@ -1,0 +1,5 @@
+.cache/
+.templateengine/
+.nuget/
+.dotnet/
+code/

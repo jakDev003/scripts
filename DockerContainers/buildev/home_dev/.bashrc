@@ -118,42 +118,27 @@ fi
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-# Utilities
-trimstring () {
-    string=$1
-    trimmed_string=$string
-    if [[ $2 -eq 1 ]]; then
-        # trim start
-        trimmed_string="${string#"${string%%[![:space:]]*}"}"
-    elif [[ $2 -eq 2 ]]; then
-        # trim end
-        trimmed_string="${string%"${string##*[![:space:]]}"}"
-    elif [[ $2 -eq 3 ]]; then
-        # trim start and end
-        trimmed_string="${string#"${string%%[![:space:]]*}"}"
-        trimmed_string="${trimmed_string%"${trimmed_string##*[![:space:]]}"}"
-    fi
-    echo $trimmed_string
-}
 
 # Custom Info
-manufacturer () {
-    echo "Model:    $(command lscpu | grep 'Model name' | cut -f 2 -d ":" | awk '{$1=$1}1')"
+show_my_info () {
+    output=$(curl https://ifconfig.me/)
+    
+    clear
+    
+    printf "\n"
+    printf "   %s\n" "IP ADDR: $output"
+    printf "   %s\n" "USER: $(whoami)"
+    printf "   %s\n" "DATE: $(date)"
+    printf "   %s\n" "UPTIME: $(uptime -p)"
+    printf "   %s\n" "HOSTNAME: $(hostname -f)"
+    printf "   %s\n" "MODEL: $(command lscpu | grep 'Model name' | cut -f 2 -d ":" | awk '{$1=$1}1')"
+    #printf "   %s\n" "CPU: $(awk -F: '/model name/{print $2}' | head -1)"
+    printf "   %s\n" "KERNEL: $(uname -rms)"
+    printf "   %s\n" "PACKAGES: $(dpkg --get-selections | wc -l)"
+    #printf "   %s\n" "RESOLUTION: $(xrandr | awk '/\*/{printf $1" "}')"
+    #printf "   %s\n" "MEMORY: $(free -m -h | awk '/Mem/{print $3"/"$2}')"
+    printf "\n"
 }
-
-
-username () {
-    echo "Username: $(command whoami)"
-}
-
-kernalname () {
-    echo "Kernal:   $(command uname -r)"
-}
-
-distribution_description () {
-    command echo "$(grep -E -w 'VERSION|NAME|PRETTY_NAME' /etc/os-release)" || echo "Distribution: $(cat /etc/issue.net)" || echo "$(lsb_release -a)"
-}
-
 
 alias vi="vim"
 
@@ -183,8 +168,6 @@ export PATH=$M2:$PATH
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # My Custom neofetch substitution
-username
-manufacturer
-kernalname
-distribution_description
+show_my_info
+
 
