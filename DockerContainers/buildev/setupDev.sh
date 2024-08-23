@@ -77,7 +77,7 @@ sudo ln -s /opt/jdtls /usr/local/bin/jdtls
 
 sudo add-apt-repository ppa:dotnet/backports
 sudo apt update
-sudo apt install dotnet-sdk-8.0 -y
+sudo apt install dotnet-sdk-6.0 -y
 dotnet --version
 
 dotnet tool install --global dotnet-ef --version 6.0.6
@@ -90,8 +90,7 @@ sudo apt update
 sudo apt install mono-complete -y
 mono --version
 
-OMNISHARP_VER=0.19.8
-wget -qO csharp-language-server-protocol.tar.gz "https://github.com/OmniSharp/csharp-language-server-protocol/archive/refs/tags/v$OMNISHARP_VER.tar.gz"
-sudo tar xf csharp-language-server-protocol.tar.gz
-cd csharp-language-server-protocol-$OMNISHARP_VER/ && sh build.sh
+# Instal Omnisharp
+wget https://github.com/OmniSharp/omnisharp-roslyn/releases/download/v1.39.12/omnisharp-linux-x64-net6.0.tar.gz
+cd omnisharp-roslyn/ && sh build.sh
 
