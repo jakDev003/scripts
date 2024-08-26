@@ -132,6 +132,7 @@ show_my_info () {
     printf "   %s\n" "UPTIME: $(uptime -p)"
     printf "   %s\n" "HOSTNAME: $(hostname -f)"
     printf "   %s\n" "MODEL: $(command lscpu | grep 'Model name' | cut -f 2 -d ":" | awk '{$1=$1}1')"
+    printf "   %s\n" "DISTRO: $(cat /etc/*-release | grep "PRETTY_NAME" | sed 's/.*=//')"
     #printf "   %s\n" "CPU: $(awk -F: '/model name/{print $2}' | head -1)"
     printf "   %s\n" "KERNEL: $(uname -rms)"
     printf "   %s\n" "PACKAGES: $(dpkg --get-selections | wc -l)"
@@ -142,12 +143,82 @@ show_my_info () {
 
 alias vi="vim"
 
+
+
+# Install SDKMan if not found ( For Java )
+if [[  $(source "$HOME/.sdkman/bin/sdkman-init.sh" && sdk version) == *sdk* ]]; then
+    # Install required packages
+    packagesNeeded=(curl wget unzip zip)
+    if [ -x "$(command -v apk)" ];
+    then
+        sudo apk add --no-cache "${packagesNeeded[@]}"
+    elif [ -x "$(command -v apt-get)" ];
+    then
+        sudo apt-get install "${packagesNeeded[@]}"
+    elif [ -x "$(command -v dnf)" ];
+    then
+        sudo dnf install "${packagesNeeded[@]}"
+    elif [ -x "$(command -v zypper)" ];
+    then
+        sudo zypper install "${packagesNeeded[@]}"
+    else
+        echo "FAILED TO INSTALL PACKAGE: Package manager not found. You must manually install: "${packagesNeeded[@]}"">&2;
+    fi
+    # Install SDK Man
+    curl -s "https://get.sdkman.io" | bash -s -- -y
+    source "$HOME/.sdkman/bin/sdkman-init.sh"
+    # Install Java Stuff
+    sdk install ant
+    sdk install java 21.0.4-tem
+    sdk install java 8.0.422-tem
+    sdk install maven
+fi
+
+# Install NVM if not found
+if [[ $(nvm --version) ]]; then
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
+    mkdir -p /usr/local/nvm
+    touch /usr/local/nvm/default-packages
+    cat << EOF > /usr/local/nvm/default-packages
+webpack
+webpack-cli
+dotenv
+prettier
+@angular/cli
+cspell
+typescript-language-server
+yaml-language-server
+vscode-languageserver
+vscode-html-languageservice
+vscode-json-languageservice
+vscode-css-languageservice
+vscode-languageserver-types
+dockerfile-language-server-nodejs
+bash-language-server"
+@angular/language-server
+cssmodules-language-server
+css-variables-language-server
+eslint"
+stylelint
+stylelint-scss
+eslint-webpack-plugin
+eslint-plugin-html
+markdownlint
+EOF
+fi
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm
+nvm install 20
+
 # Install Starship if not found
 if [[ $(whereis starship) == *starship* ]]; then
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash -s -- -y
 fi
 eval "$(starship init bash)" 
 clear
+
+export PATH=$PATH:/usr/local/bin/OmniSharp
 
 # Java setup
 #export JAVA_HOME=/usr/lib/jvm/java
@@ -170,4 +241,4 @@ export PATH=$M2:$PATH
 # My Custom neofetch substitution
 show_my_info
 
-
+source "$HOME/.sdkman/bin/sdkman-init.sh"
