@@ -57,11 +57,11 @@ RUN usermod -aG ${GROUP_ID} ${USER_NAME}
 RUN install -d -m 0755 -o ${USER_NAME} -g ${USER_NAME} /home/${USER_NAME}
 
 # Get swf tools (legacy system)
-RUN wget -O - http://www.swftools.org/swftools-$SWF_VERSION.tar.gz | tar -xzf -
+RUN wget --no-check-certificate -O - http://www.swftools.org/swftools-$SWF_VERSION.tar.gz | tar -xzf -
 
 # Get compiler & Maven
 RUN apt -y install openjdk-8-jdk
-RUN wget -O - https://archive.apache.org/dist/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz | tar -xzf -
+RUN wget --no-check-certificate -O - https://archive.apache.org/dist/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz | tar -xzf -
 
 # Install Node Version Manager
 ARG NVM_DIR=/usr/local/nvm
@@ -69,7 +69,7 @@ RUN mkdir -p ${NVM_DIR}
 ENV NVM_DIR ${NVM_DIR}
 ENV NODE_VERSION v16.17.0
 COPY default-packages /usr/local/nvm/
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+RUN curl --insecure -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
 RUN /bin/bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && nvm use --delete-prefix $NODE_VERSION"
 # add node and npm to the PATH
 ENV NODE_PATH $NVM_DIR/versions/node/$NODE_VERSION/bin
@@ -136,16 +136,16 @@ LABEL net.wealth-agreementexpress.build_time=${BUILD_TIME}
 
 # Install Lazygit
 RUN export LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') \
-  && curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+  && curl --insecure -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
 RUN tar -xvf lazygit.tar.gz lazygit
 RUN sudo install lazygit /usr/local/bin
 
 # Install Starship
-RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
+RUN curl --insecure -sS https://starship.rs/install.sh | sh -s -- -y
 
 # Install Helix Text Editor
 RUN export HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
-  && wget -qO helix.tar.xz https://github.com/helix-editor/helix/releases/latest/download/helix-$HELIX_VERSION-x86_64-linux.tar.xz
+  && wget --no-check-certificate -qO helix.tar.xz https://github.com/helix-editor/helix/releases/latest/download/helix-$HELIX_VERSION-x86_64-linux.tar.xz
 RUN sudo mkdir /opt/helix
 RUN sudo tar xf helix.tar.xz --strip-components=1 -C /opt/helix
 RUN sudo ln -s /opt/helix/hx /usr/local/bin/hx
@@ -153,11 +153,11 @@ RUN hx --version
 RUN rm -rf helix.tar.xz
 
 # Install RipGrep
-RUN curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb
+RUN curl --insecure -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb
 RUN sudo dpkg -i ripgrep_14.1.0-1_amd64.deb
 
 # Install JDTLS
-RUN wget -qO jdt-language-server-latest.tar.gz https://www.eclipse.org/downloads/download.php?file=/jdtls/snapshots/jdt-language-server-latest.tar.gz
+RUN wget --no-check-certificate -qO jdt-language-server-latest.tar.gz https://www.eclipse.org/downloads/download.php?file=/jdtls/snapshots/jdt-language-server-latest.tar.gz
 RUN sudo mkdir /opt/jdtls
 RUN sudo tar xf jdt-language-server-latest.tar.gz -C /opt/jdtls
 RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
