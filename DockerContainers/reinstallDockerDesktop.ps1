@@ -16,8 +16,14 @@ function Install-DockerDesktop {
     $installerUrl = "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     $installerPath = "$env:TEMP\DockerDesktopInstaller.exe"
     
-    # Download the installer
-    Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+    # Check if the installer already exists
+    if (-Not (Test-Path $installerPath)) {
+        Write-Host "Downloading Docker Desktop installer..."
+        # Download the installer
+        Invoke-WebRequest -Uri $installerUrl -OutFile $installerPath
+    } else {
+        Write-Host "Docker Desktop installer already exists. Skipping download."
+    }
     
     # Run the installer
     Start-Process -FilePath $installerPath -Wait -NoNewWindow
