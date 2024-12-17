@@ -98,6 +98,11 @@ ENV PATH=$PATH:/opt/helix/hx
 RUN hx --version
 RUN rm -rf helix.tar.xz
 
+# Install Neovim from Source
+RUN sudo apt-get install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
+RUN git clone "https://github.com/neovim/neovim.git"
+RUN cd neovim && make CMAKE_BUILD_TYPE=Release && sudo make install
+
 # Install RipGrep
 RUN curl -LO https://github.com/BurntSushi/ripgrep/releases/download/14.1.0/ripgrep_14.1.0-1_amd64.deb
 RUN sudo dpkg -i ripgrep_14.1.0-1_amd64.deb
@@ -130,9 +135,12 @@ RUN sudo apt install mono-complete -y
 RUN mono --version
 
 # Install Omnisharp LSP
-RUN wget https://github.com/OmniSharp/omnisharp-roslyn/releases/download/v1.39.12/omnisharp-linux-x64-net6.0.tar.gz
-RUN cd omnisharp-roslyn/ && sh build.sh
+#RUN wget https://github.com/OmniSharp/omnisharp-roslyn/releases/download/v1.39.12/omnisharp-linux-x64-net6.0.tar.gz
+#RUN cd omnisharp-roslyn/ && sh build.sh
 
+# Copy Dotfiles
+RUN git clone https://github.com/jakDev003/dotfiles.git
+#RUN cd dotfiles && sudo bash ./syncDotfiles.sh
 
 # Avoid container exit.
 CMD ["tail", "-f", "/dev/null"]
