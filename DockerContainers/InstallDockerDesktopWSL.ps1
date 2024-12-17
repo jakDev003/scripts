@@ -1,15 +1,3 @@
-# Function to uninstall Docker Desktop
-function Uninstall-DockerDesktop {
-    Write-Host "Uninstalling Docker Desktop..."
-    $uninstallerPath = "C:\Program Files\Docker\Docker\Docker Desktop Installer.exe"
-    if (Test-Path $uninstallerPath) {
-        Start-Process -FilePath $uninstallerPath -ArgumentList "uninstall" -Wait -NoNewWindow
-        Write-Host "Docker Desktop uninstalled successfully."
-    } else {
-        Write-Host "Docker Desktop is not installed."
-    }
-}
-
 # Function to install Docker Desktop
 function Install-DockerDesktop {
     Write-Host "Installing Docker Desktop..."
@@ -30,6 +18,11 @@ function Install-DockerDesktop {
     Write-Host "Docker Desktop installed successfully."
 }
 
+function InstallWSL {
+    Write-Host "Installing Windows Subsystem for Linux..."
+	Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
+}
+
 # Main script execution
-Uninstall-DockerDesktop
+InstallWSL
 Install-DockerDesktop

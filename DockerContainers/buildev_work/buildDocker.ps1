@@ -1,19 +1,20 @@
+$tagName = "jak/buildev"
+
 Write-Host "Removing old image if found"
-if (docker images -q jak/bd) {
-    docker image rm jak/bd
+if (docker images -q $tagName) {
+    docker image rm $tagName
 }
 
-if (-not (docker images -q ubuntu:24.04)) {
+if (-not (docker images -q rockylinux:9.3)) {
     Write-Host "Pulling image"
-    docker pull ubuntu:24.04
+    docker pull rockylinux:9.3
 }
 
 Write-Host "Building Image"
-#docker build -t jak/buildev .
-docker build -f Dockerfile.jak -t jak/bd .
+docker build --no-cache -t $tagName . 
 
 # Check if the image was built successfully
-if (docker images -q jak/bd) {
+if (docker images -q $tagName) {
     Write-Host "Image built successfully. Running Container"
     $CONTAINER_NETWORK = "a360i"
 
@@ -32,11 +33,11 @@ if (docker images -q jak/bd) {
         }
     }
 
-    $DEVBUILD_USER = $(docker inspect --format='{{.Config.User}}' jak/bd)
+    $DEVBUILD_USER = $(docker inspect --format='{{.Config.User}}' $tagName)
     docker run -d -it --name buildev2 --network $CONTAINER_NETWORK -h devbuild --network-alias devbuild `
-        -e MAVEN_USERNAME=admin --rm -v "$HOME/home_dev:/home/$DEVBUILD_USER" -v "publi.vol:/publish" ` 
+        -e MAVEN_USERNAME=admin --rm -v "$HOME/home_dev:/home/$DEVBUILD_USER" -v "publi.vol:/publish" `
         -v "trans.vol:/xfer" -v "codev.vol:/home/$DEVBUILD_USER/code" -p 1023:22 `
-        jak/bd bash
+        $tagName bash
 } else {
     Write-Host "Image build failed. Container will not be run."
 }

@@ -10,6 +10,7 @@ ARG NOD_VERSION_REACT=16.19.1
 ARG NOD_VERSION_ANGULAR=20.10.0
 
 # Get our utilities
+RUN yum update -y
 RUN yum -y install git gzip wget tar xz python3 python-pip sudo vim procps make ant \
            openssh-server hostname iputils rsync dos2unix
 
@@ -31,11 +32,11 @@ RUN useradd -l -u ${USER_ID} -g ${USER_NAME} ${USER_NAME}
 RUN install -d -m 0755 -o ${USER_NAME} -g ${USER_NAME} /home/${USER_NAME}
 
 # Get swf tools (legacy system)
-RUN wget -O - http://www.swftools.org/swftools-$SWF_VERSION.tar.gz | tar -xzf -
+RUN wget --no-check-certificate -O - http://www.swftools.org/swftools-$SWF_VERSION.tar.gz | tar -xzf -
 
 # Get compiler & Maven
 RUN yum -y install java-$JDK_VERSION-openjdk-devel
-RUN wget -O - https://archive.apache.org/dist/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz | tar -xzf -
+RUN wget --no-check-certificate -O - https://archive.apache.org/dist/maven/maven-3/$MVN_VERSION/binaries/apache-maven-$MVN_VERSION-bin.tar.gz | tar -xzf -
 
 # Install Node Version Manager
 RUN touch ~/.bashrc && chmod +x ~/.bashrc
@@ -64,6 +65,9 @@ COPY content/env /env/.env
 RUN echo "${USER_NAME} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 RUN ssh-keygen -A
 RUN echo "${USER_NAME}:password" | chpasswd
+
+# Make yum ignore ssl
+RUN echo "sslverify=false" >> /etc/yum.conf
 
 USER "${USER_NAME}"
 
@@ -101,4 +105,41 @@ LABEL net.wealth-agreementexpress.build_user=${BUILD_USER}
 LABEL net.wealth-agreementexpress.build_user=${BUILD_DIR}
 LABEL net.wealth-agreementexpress.build_time=${BUILD_TIME}
 
+# Install Lazygit
+RUN export LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') \
+  && curl --insecure -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+RUN tar -xvf lazygit.tar.gz lazygit
+RUN sudo install lazygit /usr/local/bin
+
+# Install Starship
+RUN curl --insecure -sS https://starship.rs/install.sh | sh -s -- -y
+
+# Install Ripgrep
+#RUN export RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
+#    && curl --insecure -Lo ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl.tar.gz" \
+#    tar -xzf ripgrep.tar.gz --strip-components=1 -C /usr/local/bin ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl/rg
+
+RUN export RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
+    && curl --insecure -Lo ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+
+# Install Helix Text Editor
+RUN export HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
+  && wget --no-check-certificate -qO helix.tar.xz https://github.com/helix-editor/helix/releases/latest/download/helix-$HELIX_VERSION-x86_64-linux.tar.xz
+RUN sudo mkdir /opt/helix
+RUN sudo tar xf helix.tar.xz --strip-components=1 -C /opt/helix
+RUN sudo ln -s /opt/helix/hx /usr/local/bin/hx
+RUN hx --version
+RUN rm -rf helix.tar.xz
+
+# Install JDTLS
+RUN wget --no-check-certificate -qO jdt-language-server-latest.tar.gz https://www.eclipse.org/downloads/download.php?file=/jdtls/snapshots/jdt-language-server-latest.tar.gz
+RUN sudo mkdir /opt/jdtls
+RUN sudo tar xf jdt-language-server-latest.tar.gz -C /opt/jdtls
+RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
+
+# Cleanup
+RUN sudo rm -rf *.gz
+
+# Avoid container exit.
+CMD ["tail", "-f", "/dev/null"]
 
