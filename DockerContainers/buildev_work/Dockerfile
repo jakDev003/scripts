@@ -1,5 +1,4 @@
 FROM rockylinux:9.3 
-RUN yum update -y
 
 # Define our versions
 ARG JDK_VERSION=1.8.0
