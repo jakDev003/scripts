@@ -109,11 +109,13 @@ RUN export LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield
   && curl --insecure -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
 RUN tar -xvf lazygit.tar.gz lazygit
 RUN sudo install lazygit /usr/local/bin
+RUN rm -rf lazygit.tar.gz
 
 # Install Neovim from Source
-RUN sudo apt-get install -y ninja-build gettext libtool libtool-bin autoconf automake cmake g++ pkg-config unzip
-RUN git clone "https://github.com/neovim/neovim.git"
-RUN cd neovim && make CMAKE_BUILD_TYPE=Release && sudo make install
+RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+RUN tar -xzf nvim-linux64.tar.gz
+RUN sudo mv nvim-linux64 /usr/local/bin/nvim
+#RUN rm -rf nvim-linux64.tar.gz
 
 # Install Starship
 RUN curl --insecure -sS https://starship.rs/install.sh | sh -s -- -y
@@ -121,6 +123,7 @@ RUN curl --insecure -sS https://starship.rs/install.sh | sh -s -- -y
 # Install Ripgrep
 RUN export RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
     && curl --insecure -Lo ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+RUN rm -rf ripgrep.tar.gz
 
 # Install Helix Text Editor
 RUN export HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
@@ -136,13 +139,11 @@ RUN wget --no-check-certificate -qO jdt-language-server-latest.tar.gz https://ww
 RUN sudo mkdir /opt/jdtls
 RUN sudo tar xf jdt-language-server-latest.tar.gz -C /opt/jdtls
 RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
+RUN rm -rf jdt-language-server-latest.tar.gz
 
 # Copy Dotfiles
 RUN cd /home/${USER_NAME}/ && git clone https://github.com/jakDev003/dotfiles.git
 #RUN cd /home/${USER_NAME}/dotfiles && sudo bash ./syncDotfiles.sh
-
-# Cleanup
-RUN sudo rm -rf *.gz
 
 # Avoid container exit.
 CMD ["tail", "-f", "/dev/null"]
