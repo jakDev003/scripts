@@ -134,6 +134,13 @@ RUN tar -xvf lazygit.tar.gz lazygit
 RUN sudo install lazygit /usr/local/bin
 RUN rm -rf lazygit.tar.gz
 
+# Install LuaRocks
+RUN wget https://luarocks.org/releases/luarocks-3.11.1.tar.gz \
+ && tar zxpf luarocks-3.11.1.tar.gz \
+ && cd luarocks-3.11.1 \
+ && ./configure && make && make install \
+ && luarocks install luasocket
+
 # Install Neovim from Source
 RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
 RUN tar -xzf nvim-linux64.tar.gz
