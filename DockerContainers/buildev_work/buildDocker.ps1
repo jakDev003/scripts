@@ -1,7 +1,11 @@
+param (
+    [switch]$RemoveOldImage
+)
+
 $tagName = "jak/buildev"
 
 Write-Host "Removing old image if found"
-if (docker images -q $tagName) {
+if ($RemoveOldImage -and (docker images -q $tagName)) {
     docker image rm $tagName
 }
 
@@ -37,6 +41,8 @@ if (docker images -q $tagName) {
     docker run -d -it --name buildev2 --network $CONTAINER_NETWORK -h devbuild --network-alias devbuild `
         -e MAVEN_USERNAME=admin --rm -v "$HOME/home_dev:/home/$DEVBUILD_USER" -v "publi.vol:/publish" `
         -v "trans.vol:/xfer" -v "codev.vol:/home/$DEVBUILD_USER/code" -p 1023:22 `
+        -v "$HOME/Documents/Git-Repos:/home/$DEVBUILD_USER/Git-Repos" `
+		-v "$HOME/Documents/CustomCode:/home/$DEVBUILD_USER/CustomCode" `
         $tagName bash
 } else {
     Write-Host "Image build failed. Container will not be run."
