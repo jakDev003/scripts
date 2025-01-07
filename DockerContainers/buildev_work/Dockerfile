@@ -11,9 +11,8 @@ ARG NOD_VERSION_ANGULAR=20.10.0
 # Get our utilities
 RUN yum update -y
 RUN yum -y install git gzip wget tar xz python3 python-pip sudo vim procps make ant \
-           openssh-server hostname iputils rsync dos2unix gcc gcc-c++ cmake
-RUN dnf --enablerepo=crb install libstdc++-static -y
-RUN group install "Development Tools"
+           openssh-server hostname iputils rsync dos2unix gcc gcc-c++ cmake lua
+RUN dnf --enablerepo=crb install lua-devel libstdc++-static -y
 
 # goal:
 #  - if host user builds and runs this container, it will use *that* user
@@ -115,6 +114,12 @@ RUN cmake --build build-cmake
 RUN sudo install build-cmake/ninja /usr/local/bin/ninja
 WORKDIR "/home/${USER_NAME}/code"
 
+# Install Lazygit
+RUN export LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') \
+  && curl --insecure -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+RUN tar -xvf lazygit.tar.gz lazygit
+RUN sudo install lazygit /usr/local/bin
+
 # Install lua-language-server from source
 RUN git clone https://github.com/sumneko/lua-language-server /home/${USER_NAME}/lua-language-server
 WORKDIR /home/${USER_NAME}/lua-language-server
@@ -123,29 +128,21 @@ RUN cd 3rd/luamake && ./compile/install.sh
 RUN ./3rd/luamake/luamake rebuild
 RUN sudo mv /home/${USER_NAME}/lua-language-server/bin/lua-language-server /usr/local/bin/
 RUN sudo mv /home/${USER_NAME}/lua-language-server/main.lua /usr/local/bin/
-RUN echo '#!/bin/bash\n/usr/local/bin/lua-language-server -E /usr/local/bin/main.lua' > /usr/local/bin/start-lua-language-server.sh
-RUN chmod +x /usr/local/bin/start-lua-language-server.sh
+RUN echo '#!/bin/bash\n/usr/local/bin/lua-language-server -E /usr/local/bin/main.lua' | sudo tee /usr/local/bin/start-lua-language-server.sh > /dev/null
+RUN sudo chmod +x /usr/local/bin/start-lua-language-server.sh
 WORKDIR "/home/${USER_NAME}/code"
 
-# Install Lazygit
-RUN export LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*') \
-  && curl --insecure -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-RUN tar -xvf lazygit.tar.gz lazygit
-RUN sudo install lazygit /usr/local/bin
-RUN rm -rf lazygit.tar.gz
-
 # Install LuaRocks
-RUN wget https://luarocks.org/releases/luarocks-3.11.1.tar.gz \
- && tar zxpf luarocks-3.11.1.tar.gz \
- && cd luarocks-3.11.1 \
- && ./configure && make && make install \
- && luarocks install luasocket
+RUN wget --no-check-certificate https://luarocks.org/releases/luarocks-3.11.1.tar.gz
+RUN tar zxpf luarocks-3.11.1.tar.gz
+WORKDIR /home/${USER_NAME}/luarocks-3.11.1/
+RUN ./configure && make && sudo make install
+WORKDIR "/home/${USER_NAME}/code"
 
 # Install Neovim from Source
-RUN wget https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
+RUN wget --no-check-certificate https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
 RUN tar -xzf nvim-linux64.tar.gz
 RUN sudo mv nvim-linux64 /usr/local/bin/nvim
-#RUN rm -rf nvim-linux64.tar.gz
 
 # Install Starship
 RUN curl --insecure -sS https://starship.rs/install.sh | sh -s -- -y
@@ -153,7 +150,6 @@ RUN curl --insecure -sS https://starship.rs/install.sh | sh -s -- -y
 # Install Ripgrep
 RUN export RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ripgrep/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
     && curl --insecure -Lo ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl.tar.gz"
-RUN rm -rf ripgrep.tar.gz
 
 # # Install Helix Text Editor
 # RUN export HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
@@ -169,7 +165,6 @@ RUN wget --no-check-certificate -qO jdt-language-server-latest.tar.gz https://ww
 RUN sudo mkdir /opt/jdtls
 RUN sudo tar xf jdt-language-server-latest.tar.gz -C /opt/jdtls
 RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
-RUN rm -rf jdt-language-server-latest.tar.gz
 
 # Copy Dotfiles
 RUN cd /home/${USER_NAME}/ && git clone https://github.com/jakDev003/dotfiles.git
