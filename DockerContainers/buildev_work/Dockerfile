@@ -11,7 +11,7 @@ ARG NOD_VERSION_ANGULAR=20.10.0
 # Get our utilities
 RUN yum update -y
 RUN yum -y install git gzip wget tar xz python3 python-pip sudo vim procps make ant \
-           openssh-server hostname iputils rsync dos2unix gcc ninja-build cmake
+           openssh-server hostname iputils rsync dos2unix gcc gcc-c++ cmake
 RUN group install "Development Tools"
 
 # goal:
@@ -105,7 +105,7 @@ LABEL net.wealth-agreementexpress.build_user=${BUILD_USER}
 LABEL net.wealth-agreementexpress.build_user=${BUILD_DIR}
 LABEL net.wealth-agreementexpress.build_time=${BUILD_TIME}
 
-# Install lua-language-server
+# Install lua-language-server from source
 RUN git clone https://github.com/sumneko/lua-language-server /home/${USER_NAME}/lua-language-server
 WORKDIR /home/${USER_NAME}/lua-language-server
 RUN git submodule update --init --recursive
@@ -115,6 +115,15 @@ RUN sudo mv /home/${USER_NAME}/lua-language-server/bin/Linux/lua-language-server
 RUN sudo mv /home/${USER_NAME}/lua-language-server/main.lua /usr/local/bin/
 RUN echo '#!/bin/bash\n/usr/local/bin/lua-language-server -E /usr/local/bin/main.lua' > /usr/local/bin/start-lua-language-server.sh
 RUN chmod +x /usr/local/bin/start-lua-language-server.sh
+WORKDIR "/home/${USER_NAME}/code"
+
+# Install Ninja-build from source
+RUN git clone https://github.com/ninja-build/ninja.git /home/${USER_NAME}/ninja
+WORKDIR /home/${USER_NAME}/ninja
+RUN git checkout release
+RUN cmake -Bbuild-cmake -H.
+RUN cmake --build build-cmake
+RUN sudo install build-cmake/ninja /usr/local/bin/ninja
 WORKDIR "/home/${USER_NAME}/code"
 
 # Install Lazygit
