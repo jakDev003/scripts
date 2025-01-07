@@ -11,7 +11,8 @@ ARG NOD_VERSION_ANGULAR=20.10.0
 # Get our utilities
 RUN yum update -y
 RUN yum -y install git gzip wget tar xz python3 python-pip sudo vim procps make ant \
-           openssh-server hostname iputils rsync dos2unix
+           openssh-server hostname iputils rsync dos2unix gcc
+RUN group install "Development Tools"
 
 # goal:
 #  - if host user builds and runs this container, it will use *that* user
