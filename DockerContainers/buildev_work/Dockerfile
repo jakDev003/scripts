@@ -166,7 +166,7 @@ RUN rm -rf jdt-language-server-latest.tar.gz
 
 # Copy Dotfiles
 RUN cd /home/${USER_NAME}/ && git clone https://github.com/jakDev003/dotfiles.git
-#RUN cd /home/${USER_NAME}/dotfiles && sudo bash ./syncDotfiles.sh
+RUN mkdir -p /home/${USER_NAME}/.config && cp -r /home/${USER_NAME}/dotfiles/.config/* /home/${USER_NAME}/.config/
 
 # Avoid container exit.
 CMD ["tail", "-f", "/dev/null"]
