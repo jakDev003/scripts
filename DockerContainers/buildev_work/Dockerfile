@@ -125,14 +125,14 @@ RUN export RIPGREP_VERSION=$(curl -s "https://api.github.com/repos/BurntSushi/ri
     && curl --insecure -Lo ripgrep.tar.gz "https://github.com/BurntSushi/ripgrep/releases/download/${RIPGREP_VERSION}/ripgrep-${RIPGREP_VERSION}-x86_64-unknown-linux-musl.tar.gz"
 RUN rm -rf ripgrep.tar.gz
 
-# Install Helix Text Editor
-RUN export HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
-  && wget --no-check-certificate -qO helix.tar.xz https://github.com/helix-editor/helix/releases/latest/download/helix-$HELIX_VERSION-x86_64-linux.tar.xz
-RUN sudo mkdir /opt/helix
-RUN sudo tar xf helix.tar.xz --strip-components=1 -C /opt/helix
-RUN sudo ln -s /opt/helix/hx /usr/local/bin/hx
-RUN hx --version
-RUN rm -rf helix.tar.xz
+# # Install Helix Text Editor
+# RUN export HELIX_VERSION=$(curl -s "https://api.github.com/repos/helix-editor/helix/releases/latest" | grep -Po '"tag_name": "\K[0-9.]+') \
+#   && wget --no-check-certificate -qO helix.tar.xz https://github.com/helix-editor/helix/releases/latest/download/helix-$HELIX_VERSION-x86_64-linux.tar.xz
+# RUN sudo mkdir /opt/helix
+# RUN sudo tar xf helix.tar.xz --strip-components=1 -C /opt/helix
+# RUN sudo ln -s /opt/helix/hx /usr/local/bin/hx
+# RUN hx --version
+# RUN rm -rf helix.tar.xz
 
 # Install JDTLS
 RUN wget --no-check-certificate -qO jdt-language-server-latest.tar.gz https://www.eclipse.org/downloads/download.php?file=/jdtls/snapshots/jdt-language-server-latest.tar.gz

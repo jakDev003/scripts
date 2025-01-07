@@ -16,8 +16,8 @@ done
 
 TAG_NAME="jak/buildev"
 
-echo "Removing old image if found"
 if $REMOVE_OLD_IMAGE && [ "$(docker images -q $TAG_NAME)" ]; then
+	echo "Removing old image if found"
 	docker image rm $TAG_NAME
 fi
 

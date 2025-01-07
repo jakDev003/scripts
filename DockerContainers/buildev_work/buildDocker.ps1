@@ -4,8 +4,8 @@ param (
 
 $tagName = "jak/buildev"
 
-Write-Host "Removing old image if found"
 if ($RemoveOldImage -and (docker images -q $tagName)) {
+    Write-Host "Removing old image if found"
     docker image rm $tagName
 }
 
