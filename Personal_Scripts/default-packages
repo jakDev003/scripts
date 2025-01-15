@@ -28,3 +28,4 @@ stylelint-scss
 eslint-webpack-plugin
 eslint-plugin-html
 markdownlint
+markdownlint-cli
