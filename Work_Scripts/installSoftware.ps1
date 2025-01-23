@@ -7,6 +7,7 @@ Write-Output "Installing Apps"
 $apps = @(
     @{name = "7zip.7zip"},
     @{name = "Adobe.Acrobat.Reader.64-bit"},
+    @{name = "Apache.Groovy.4"},
     @{name = "Amazon.AWSCLI"},
     # @{name = "Axosoft.GitKraken"},
     # @{name = "Devolutions.RemoteDesktopManagerFree"},
