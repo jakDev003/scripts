@@ -77,7 +77,7 @@ services:
   #     - SE_VNC_NO_PASSWORD=1
   #   restart: always
 
-selenium-hub:
+  selenium-hub:
     image: selenium/hub:latest
     container_name: selenium-hub
     ports:
