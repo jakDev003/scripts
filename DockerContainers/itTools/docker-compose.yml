@@ -1,0 +1,6 @@
+services:
+  it-tools:
+    container_name: it-tools
+    image: corentinth/it-tools
+    ports:
+      - "7171:80"
