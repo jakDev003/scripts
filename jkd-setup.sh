@@ -9,11 +9,21 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
-# Create a new user called josh
+# Prompt the user for a password
+echo "Please enter a password for the 'josh' user:"
+read -s password
+
+# Create the 'josh' user with a home directory and bash shell
 useradd -m -s /bin/bash josh
 
-# Set a password for the user josh (optional)
-# echo "josh:password" | chpasswd
+# Add the 'josh' user to the sudo group
+usermod -aG sudo josh
+
+# Set the password for the 'josh' user
+echo "josh:$password" | chpasswd
+
+# Inform the user that the process is complete
+echo "The 'josh' user has been created and assigned the provided password."
 
 # Switch to the josh user
 su - josh <<'EOF'
