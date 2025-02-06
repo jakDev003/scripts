@@ -75,4 +75,7 @@ sudo install lazygit -D -t /usr/local/bin/
 echo "Installing Node Version Manager"
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 
+# ------ Setting up Vim ------
+curl -L -o ~/.vimrc https://github.com/jakDev003/dotfiles/raw/refs/heads/main/.vimrc
+
 echo "Done!"
