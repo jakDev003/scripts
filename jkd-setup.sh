@@ -41,20 +41,7 @@ cat ~/.ssh/id_rsa.pub
 
 EOF
 
-# Install lazygit
-if [ -x "$(command -v apt-get)" ]; then
-    apt-get update
-    apt-get install -y lazygit
-elif [ -x "$(command -v yum)" ]; then
-    yum install -y lazygit
-elif [ -x "$(command -v dnf)" ]; then
-    dnf install -y lazygit
-else
-    echo "Package manager not supported. Please install lazygit manually."
-    exit 1
-fi
-
-echo "User josh created, SSH key generated, and lazygit installed."
+echo "User josh created, SSH key generated"
 
 
 # ------- Install Docker -------
