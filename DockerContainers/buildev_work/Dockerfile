@@ -132,17 +132,20 @@ RUN echo '#!/bin/bash\n/usr/local/bin/lua-language-server -E /usr/local/bin/main
 RUN sudo chmod +x /usr/local/bin/start-lua-language-server.sh
 WORKDIR "/home/${USER_NAME}/code"
 
-# Install LuaRocks
-RUN wget --no-check-certificate https://luarocks.org/releases/luarocks-3.11.1.tar.gz
-RUN tar zxpf luarocks-3.11.1.tar.gz
-WORKDIR /home/${USER_NAME}/luarocks-3.11.1/
-RUN ./configure && make && sudo make install
-WORKDIR "/home/${USER_NAME}/code"
+## Install LuaRocks
+#RUN wget --no-check-certificate https://luarocks.org/releases/luarocks-3.11.1.tar.gz
+#RUN tar zxpf luarocks-3.11.1.tar.gz
+#WORKDIR /home/${USER_NAME}/luarocks-3.11.1/
+#RUN ./configure && make && sudo make install
+#WORKDIR "/home/${USER_NAME}/code"
 
 # Install Neovim from Source
-RUN wget --no-check-certificate https://github.com/neovim/neovim/releases/latest/download/nvim-linux64.tar.gz
-RUN tar -xzf nvim-linux64.tar.gz
-RUN sudo mv nvim-linux64 /usr/local/bin/nvim
+WORKDIR /opt/neovim
+RUN curl -L -o nvim-linux-x86_64.tar.gz https://github.com/neovim/neovim/releases/download/v0.10.4/nvim-linux-x86_64.tar.gz
+RUN tar -xzvf nvim-linux-x86_64.tar.gz
+RUN rm nvim-linux-x86_64.tar.gz
+ENV PATH="/opt/neovim/nvim-linux-x86_64/bin:${PATH}"
+WORKDIR "/home/${USER_NAME}/code"
 
 # Install Starship
 RUN curl --insecure -sS https://starship.rs/install.sh | sh -s -- -y
@@ -168,7 +171,7 @@ RUN sudo ln -s /opt/jdtls /usr/local/bin/jdtls
 
 # Copy Dotfiles
 RUN cd /home/${USER_NAME}/ && git clone https://github.com/jakDev003/dotfiles.git
-RUN mkdir -p /home/${USER_NAME}/.config && cp -r /home/${USER_NAME}/dotfiles/.config/* /home/${USER_NAME}/.config/
+#RUN mkdir -p /home/${USER_NAME}/.config && cp -r /home/${USER_NAME}/dotfiles/.config/* /home/${USER_NAME}/.config/
 
 # Avoid container exit.
 CMD ["tail", "-f", "/dev/null"]
