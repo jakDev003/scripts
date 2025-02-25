@@ -40,10 +40,9 @@ RUN wget --no-check-certificate -O - https://archive.apache.org/dist/maven/maven
 
 # Install Node Version Manager
 RUN touch ~/.bashrc && chmod +x ~/.bashrc
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 RUN . ~/.nvm/nvm.sh && source ~/.bashrc \
     && nvm install $NOD_VERSION_REACT \
-    && nvm use $NOD_VERSION_REACT \
     && npm install --global yarn cross-env webpack webpack-cli url-loader dotenv \
     && yarn global add lerna@7.4.2 
 
