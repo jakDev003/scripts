@@ -1,18 +1,33 @@
-# Define the images to be pulled
-$images = @(
-    "selenium/node-chromium:latest",
-    "selenium/node-firefox:latest",
-    "selenium/node-edge:latest",
-    "selenium/node-opera:latest",
-    "selenium/node-safari:latest",
-    "selenium/hub:latest"
-)
+# Function to parse YAML file and extract image names
+function Get-DockerImagesFromCompose {
+    param (
+        [string]$composeFilePath
+    )
+
+    $yaml = Get-Content $composeFilePath -Raw | ConvertFrom-Yaml
+    $images = @()
+
+    foreach ($service in $yaml.services.PSObject.Properties) {
+        $images += $service.Value.image
+    }
+
+    return $images
+}
+
+$composeFilePath = ".\docker-compose.yml"
+
+# Get the list of images from the docker-compose.yml file
+$images = Get-DockerImagesFromCompose -composeFilePath $composeFilePath
+
+# Show the number of images found
+Write-Host "   =====> Number of images found: $($images.Count)"
+
 
 # Pull the images if they are not already present
 foreach ($image in $images) {
     if (-not (docker images -q $image)) {
         Write-Host "   =====> Pulling image $image..."
-        docker pull --tls-verify=false $image
+        docker pull $image
     } else {
         Write-Host "   =====> Image $image already exists."
     }
