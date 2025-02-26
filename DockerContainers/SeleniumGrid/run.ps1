@@ -4,11 +4,12 @@ function Get-DockerImagesFromCompose {
         [string]$composeFilePath
     )
 
-    $yaml = Get-Content $composeFilePath -Raw | ConvertFrom-Yaml
     $images = @()
+    $yamlContent = Get-Content $composeFilePath -Raw
 
-    foreach ($service in $yaml.services.PSObject.Properties) {
-        $images += $service.Value.image
+    $matches = [regex]::Matches($yamlContent, 'image:\s*(\S+)')
+    foreach ($match in $matches) {
+        $images += $match.Groups[1].Value
     }
 
     return $images
