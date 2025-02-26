@@ -28,7 +28,12 @@ Write-Host "   =====> Number of images found: $($images.Count)"
 foreach ($image in $images) {
     if (-not (docker images -q $image)) {
         Write-Host "   =====> Pulling image $image..."
-        docker pull $image
+        $pullProcess = Start-Process -FilePath "docker" -ArgumentList "pull", "$image" -NoNewWindow -PassThru -Wait
+        if ($pullProcess.ExitCode -eq 0) {
+            Write-Host "   =====> Successfully pulled image $image"
+        } else {
+            Write-Host "   =====> Failed to pull image $image" -ForegroundColor Red
+        }
     } else {
         Write-Host "   =====> Image $image already exists."
     }

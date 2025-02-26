@@ -85,7 +85,7 @@ function Uninstall-DockerComponents {
     Write-Host "Checking for Docker CLI..."
     if (Get-Command docker -ErrorAction SilentlyContinue) {
         Write-Host "Uninstalling Docker CLI..."
-        winget uninstall --id Docker.DockerCli -e
+        winget uninstall --id Docker.DockerCli
     } else {
         Write-Host "Docker CLI not found."
     }
@@ -93,7 +93,7 @@ function Uninstall-DockerComponents {
     Write-Host "Checking for Docker Desktop..."
     if (Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name LIKE 'Docker Desktop%'") {
         Write-Host "Uninstalling Docker Desktop..."
-        winget uninstall --id Docker.DockerDesktop -e
+        winget uninstall --id Docker.DockerDesktop
     } else {
         Write-Host "Docker Desktop not found."
     }
@@ -101,7 +101,7 @@ function Uninstall-DockerComponents {
     Write-Host "Checking for Docker Compose..."
     if (Get-Command docker-compose -ErrorAction SilentlyContinue) {
         Write-Host "Uninstalling Docker Compose..."
-        winget uninstall --id Docker.DockerCompose -e
+        winget uninstall --id Docker.DockerCompose
     } else {
         Write-Host "Docker Compose not found."
     }
@@ -122,7 +122,7 @@ function Install-DockerComponents {
     Write-Host "Checking for Docker CLI..."
     if (-Not (Get-Command docker -ErrorAction SilentlyContinue)) {
         Write-Host "Installing Docker CLI..."
-        winget install --id Docker.DockerCli -e
+        winget install --id Docker.DockerCli
     } else {
         Write-Host "Docker CLI is already installed."
     }
@@ -130,7 +130,7 @@ function Install-DockerComponents {
     Write-Host "Checking for Docker Compose..."
     if (-Not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
         Write-Host "Installing Docker Compose..."
-        winget install --id Docker.DockerCompose -e
+        winget install --id Docker.DockerCompose
     } else {
         Write-Host "Docker Compose is already installed."
     }
