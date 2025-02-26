@@ -1,6 +1,3 @@
-# To execute this docker-compose yml file use `docker-compose -f docker-compose-v3-seleniumgrid-m2.yml up`
-# Add the `-d` flag at the end for detached execution
-# To stop the execution, hit Ctrl+C, and then `docker-compose -f docker-compose-v3-seleniumgrid-m2.yml down`
 services:
   chrome:
     image: selenium/node-chromium:latest
@@ -18,13 +15,14 @@ services:
       - SE_SESSION_TIMEOUT=${SE_SESSION_TIMEOUT}
     restart: always
     deploy:
-        resources:
-            limits:
-              cpus: '0.5'
-              memory: 512M
-            reservations:
-              cpus: '0.25'
-              memory: 256M
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
   firefox:
     image: selenium/node-firefox:latest
     shm_size: 2gb
@@ -43,11 +41,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '4.0'
+          memory: 2G
         reservations:
-          cpus: '0.25'
-          memory: 256M
+          cpus: '1.0'
+          memory: 1G
 
   edge:
     image: selenium/node-edge:latest
@@ -67,11 +65,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '4.0'
+          memory: 2G
         reservations:
-          cpus: '0.25'
-          memory: 256M
+          cpus: '1.0'
+          memory: 1G
 
   selenium-hub:
     image: selenium/hub:latest
@@ -83,9 +81,6 @@ services:
     restart: always
     deploy:
       resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
         reservations:
-          cpus: '0.25'
-          memory: 256M
+          cpus: '0.5'
+          memory: 256MB
