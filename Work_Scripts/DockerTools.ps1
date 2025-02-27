@@ -3,14 +3,15 @@
 # It uses the Windows Package Manager (winget) to manage Docker installations and Windows Subsystem for Linux (WSL) for Docker Desktop.
 
 param(
-    [switch]$Uninstall,              # Use this switch to uninstall Docker and Wsl and Wsl Containers
-    [switch]$Install,                # Use this switch to install Docker components
-    [switch]$UninstallDocker,        # Use this switch to uninstall Docker components
-    [switch]$UninstallWsl,           # Use this switch to uninstall Wsl
+    [switch]$Uninstall, # Use this switch to uninstall Docker and Wsl and Wsl Containers
+    [switch]$Install, # Use this switch to install Docker components
+    [switch]$UninstallDocker, # Use this switch to uninstall Docker components
+    [switch]$UninstallWsl, # Use this switch to uninstall Wsl
     [switch]$UninstallWslContainers  # Use this switch to uninstall Wsl Containers
 )
 
-function CleanDocker {
+function CleanDocker
+{
 
     # Remove all unused containers, networks, images (both dangling and unreferenced), and optionally volumes.
     # The --all flag removes all unused images not just dangling ones.
@@ -19,125 +20,166 @@ function CleanDocker {
     docker system prune --all --force --volumes
 
     # Stop all running containers.
-    docker stop $(docker ps -q -a)
+    docker stop $( docker ps -q -a )
 
     # Remove all containers.
-    docker rm $(docker ps -q -a)
+    docker rm $( docker ps -q -a )
 
     # Remove all images.
-    docker rmi $(docker images -qa)
+    docker rmi $( docker images -qa )
 
     # Remove dangling images.
     docker image prune -f
 
     # Remove all volumes.
-    docker volume rm $(docker volume ls -q)
+    docker volume rm $( docker volume ls -q )
 
     # Remove dangling volumes.
     docker volume prune
 
     # Remove all networks.
-    docker network rm $(docker network ls -q)
+    docker network rm $( docker network ls -q )
 
     # Remove dangling networks.
     docker network prune
 }
 
-function Uninstall-Wsl-Containers {
-        # Get the list of all installed WSL distributions with details
+function Uninstall-Wsl-Containers
+{
+    # Get the list of all installed WSL distributions with details
     $wslDistributions = wsl --list --verbose
-    
+
     # Output the found distributions
     Write-Host "Found WSL distributions:"
     Write-Host $wslDistributions
-    
+
     # Extract distribution names
     $distributionNames = $wslDistributions -split "`n" | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s{2,}')[0] }
-    
+
     # Check if there are any distributions installed
-    if ($distributionNames) {
+    if ($distributionNames)
+    {
         # Loop through each distribution and unregister it
-        foreach ($distro in $distributionNames) {
-            if ($distro -ne "") {
+        foreach ($distro in $distributionNames)
+        {
+            if ($distro -ne "")
+            {
                 Write-Host "Unregistering WSL distribution: $distro"
-                try {
+                try
+                {
                     wsl --unregister $distro
                     Write-Host "Unregistered: $distro"
-                } catch {
-                Write-Host "Failed to unregister: $distro"
+                }
+                catch
+                {
+                    Write-Host "Failed to unregister: $distro"
                 }
             }
         }
         Write-Host "All WSL distributions have been processed."
-    } else {
+    }
+    else
+    {
         Write-Host "No WSL distributions found."
     }
 }
 
-function Uninstall-Wsl {
+function Uninstall-Wsl
+{
     Write-Host "Uninstalling WSL and WSL2..."
     Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
     Disable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
 }
 
 # Function to uninstall Docker components
-function Uninstall-DockerComponents {
+function Uninstall-DockerComponents
+{
     Write-Host "Checking for Docker CLI..."
-    if (Get-Command docker -ErrorAction SilentlyContinue) {
+    if (Get-Command docker -ErrorAction SilentlyContinue)
+    {
         Write-Host "Uninstalling Docker CLI..."
-        winget uninstall --id Docker.DockerCli
-    } else {
+        winget uninstall --id Docker.DockerCLI
+    }
+    else
+    {
         Write-Host "Docker CLI not found."
     }
 
     Write-Host "Checking for Docker Desktop..."
-    if (Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name LIKE 'Docker Desktop%'") {
+    if (Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name LIKE 'Docker Desktop%'")
+    {
         Write-Host "Uninstalling Docker Desktop..."
         winget uninstall --id Docker.DockerDesktop
-    } else {
-        Write-Host "Docker Desktop not found."
+    }
+    else
+    {
+        Write-Host "Docker Desktop not found using WMI. Trying winget search..."
+        $searchResult = winget search Docker.DockerDesktop
+        if ($searchResult -match "Docker Desktop")
+        {
+            Write-Host "Docker Desktop found using winget. Uninstalling..."
+            winget uninstall --id Docker.DockerDesktop
+        }
+        else
+        {
+            Write-Host "Docker Desktop not found using winget."
+        }
     }
 
     Write-Host "Checking for Docker Compose..."
-    if (Get-Command docker-compose -ErrorAction SilentlyContinue) {
+    if (Get-Command docker-compose -ErrorAction SilentlyContinue)
+    {
         Write-Host "Uninstalling Docker Compose..."
         winget uninstall --id Docker.DockerCompose
-    } else {
+    }
+    else
+    {
         Write-Host "Docker Compose not found."
     }
 
 }
 
 # Function to install Docker components
-function Install-DockerComponents {
+function Install-DockerComponents
+{
     Write-Host "Checking for WSL..."
-    if (-Not (Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -eq "Enabled") {
+    if (-Not (Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -eq "Enabled")
+    {
         Write-Host "Installing WSL..."
         Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
         Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
-    } else {
+    }
+    else
+    {
         Write-Host "WSL is already installed."
     }
 
     Write-Host "Checking for Docker CLI..."
-    if (-Not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    if (-Not (Get-Command docker -ErrorAction SilentlyContinue))
+    {
         Write-Host "Installing Docker CLI..."
         winget install --id Docker.DockerCli
-    } else {
+    }
+    else
+    {
         Write-Host "Docker CLI is already installed."
     }
 
     Write-Host "Checking for Docker Compose..."
-    if (-Not (Get-Command docker-compose -ErrorAction SilentlyContinue)) {
+    if (-Not (Get-Command docker-compose -ErrorAction SilentlyContinue))
+    {
         Write-Host "Installing Docker Compose..."
         winget install --id Docker.DockerCompose
-    } else {
+    }
+    else
+    {
         Write-Host "Docker Compose is already installed."
     }
 }
 
 # Display help menu
-function Show-Help {
+function Show-Help
+{
     Write-Host "Usage: .\ReinstallDockerCli.ps1 [-Uninstall] [-Install]"
     Write-Host ""
     Write-Host "Options:"
@@ -153,18 +195,29 @@ function Show-Help {
 }
 
 # Main script logic
-if ($Uninstall) {
+if ($Uninstall)
+{
     Uninstall-DockerComponents
     Uninstall-Wsl-Containers
     Uninstall-Wsl
-} elseif ($Install) {
+}
+elseif ($Install)
+{
     Install-DockerComponents
-} elseif ($UninstallWsl) {
+}
+elseif ($UninstallWsl)
+{
     Uninstall-Wsl
-} elseif ($UninstallWslContainers) {
+}
+elseif ($UninstallWslContainers)
+{
     Uninstall-Wsl-Containers
-} elseif ($UninstallDocker) {
+}
+elseif ($UninstallDocker)
+{
     Uninstall-DockerComponents
-} else {
+}
+else
+{
     Show-Help
 }
