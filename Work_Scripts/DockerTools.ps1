@@ -5,12 +5,10 @@
 param(
     [switch]$Uninstall, # Use this switch to uninstall Docker and Wsl and Wsl Containers
     [switch]$Install, # Use this switch to install Docker components
-    [switch]$UninstallDocker, # Use this switch to uninstall Docker components
-    [switch]$UninstallWsl, # Use this switch to uninstall Wsl
-    [switch]$UninstallWslContainers  # Use this switch to uninstall Wsl Containers
+    [switch]$Clean # Use this switch to clean Docker components
 )
 
-function CleanDocker
+function Clean
 {
 
     # Remove all unused containers, networks, images (both dangling and unreferenced), and optionally volumes.
@@ -44,178 +42,100 @@ function CleanDocker
     docker network prune
 }
 
-function Uninstall-Wsl-Containers
+function Install
 {
-    # Get the list of all installed WSL distributions with details
-    $wslDistributions = wsl --list --verbose
+    # This script will install WSL2, set Ubuntu as the default distribution, and install Docker Desktop on Windows 10 using winget
 
-    # Output the found distributions
-    Write-Host "Found WSL distributions:"
-    Write-Host $wslDistributions
+    # Enable the WSL feature
+    Write-Output "Enabling WSL feature..."
+    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 
-    # Extract distribution names
-    $distributionNames = $wslDistributions -split "`n" | Select-Object -Skip 1 | ForEach-Object { ($_ -split '\s{2,}')[0] }
+    # Enable the Virtual Machine Platform feature
+    Write-Output "Enabling Virtual Machine Platform feature..."
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 
-    # Check if there are any distributions installed
-    if ($distributionNames)
-    {
-        # Loop through each distribution and unregister it
-        foreach ($distro in $distributionNames)
-        {
-            if ($distro -ne "")
-            {
-                Write-Host "Unregistering WSL distribution: $distro"
-                try
-                {
-                    wsl --unregister $distro
-                    Write-Host "Unregistered: $distro"
-                }
-                catch
-                {
-                    Write-Host "Failed to unregister: $distro"
-                }
-            }
-        }
-        Write-Host "All WSL distributions have been processed."
-    }
-    else
-    {
-        Write-Host "No WSL distributions found."
-    }
+    # Download and install the WSL2 kernel update
+    Write-Output "Downloading and installing the WSL2 kernel update..."
+    $wslUpdateUrl = "https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi"
+    $wslUpdateInstaller = "$env:TEMP\wsl_update_x64.msi"
+    Invoke-WebRequest -Uri $wslUpdateUrl -OutFile $wslUpdateInstaller
+    Start-Process -FilePath msiexec.exe -ArgumentList "/i $wslUpdateInstaller /quiet /norestart" -NoNewWindow -Wait
+
+    # Set WSL2 as the default version
+    Write-Output "Setting WSL2 as the default version..."
+    wsl --set-default-version 2
+
+    # Install Ubuntu using winget
+    Write-Output "Installing Ubuntu using winget..."
+    winget install -e --id Canonical.Ubuntu
+
+    # Set Ubuntu as the default WSL distribution
+    Write-Output "Setting Ubuntu as the default WSL distribution..."
+    wsl --set-default Ubuntu
+
+    # Install Docker Desktop using winget
+    Write-Output "Installing Docker Desktop using winget..."
+    winget install -e --id Docker.DockerDesktop
+
+    Write-Output "Installation complete. Please restart your computer to apply all changes."
 }
 
-function Uninstall-Wsl
+function Uninstall
 {
-    Write-Host "Uninstalling WSL and WSL2..."
-    Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-    Disable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
-}
+    # Uninstall Docker Desktop using winget
+    Write-Output "Uninstalling Docker Desktop using winget..."
+    winget uninstall -e --id Docker.DockerDesktop
 
-# Function to uninstall Docker components
-function Uninstall-DockerComponents
-{
-    Write-Host "Checking for Docker CLI..."
-    if (Get-Command docker -ErrorAction SilentlyContinue)
-    {
-        Write-Host "Uninstalling Docker CLI..."
-        winget uninstall --id Docker.DockerCLI
-    }
-    else
-    {
-        Write-Host "Docker CLI not found."
+    # Uninstall Ubuntu using winget
+    Write-Output "Uninstalling Ubuntu using winget..."
+    winget uninstall -e --id Canonical.Ubuntu
+
+    # Remove the WSL2 kernel update
+    Write-Output "Removing the WSL2 kernel update..."
+    $wslUpdateInstaller = "$env:TEMP\wsl_update_x64.msi"
+    if (Test-Path $wslUpdateInstaller) {
+        Remove-Item $wslUpdateInstaller
     }
 
-    Write-Host "Checking for Docker Desktop..."
-    if (Get-WmiObject -Query "SELECT * FROM Win32_Product WHERE Name LIKE 'Docker Desktop%'")
-    {
-        Write-Host "Uninstalling Docker Desktop..."
-        winget uninstall --id Docker.DockerDesktop
-    }
-    else
-    {
-        Write-Host "Docker Desktop not found using WMI. Trying winget search..."
-        $searchResult = winget search Docker.DockerDesktop
-        if ($searchResult -match "Docker Desktop")
-        {
-            Write-Host "Docker Desktop found using winget. Uninstalling..."
-            winget uninstall --id Docker.DockerDesktop
-        }
-        else
-        {
-            Write-Host "Docker Desktop not found using winget."
-        }
-    }
+    # Disable the Virtual Machine Platform feature
+    Write-Output "Disabling Virtual Machine Platform feature..."
+    dism.exe /online /disable-feature /featurename:VirtualMachinePlatform /norestart
 
-    Write-Host "Checking for Docker Compose..."
-    if (Get-Command docker-compose -ErrorAction SilentlyContinue)
-    {
-        Write-Host "Uninstalling Docker Compose..."
-        winget uninstall --id Docker.DockerCompose
-    }
-    else
-    {
-        Write-Host "Docker Compose not found."
-    }
+    # Disable the WSL feature
+    Write-Output "Disabling WSL feature..."
+    dism.exe /online /disable-feature /featurename:Microsoft-Windows-Subsystem-Linux /norestart
 
-}
-
-# Function to install Docker components
-function Install-DockerComponents
-{
-    Write-Host "Checking for WSL..."
-    if (-Not (Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux).State -eq "Enabled")
-    {
-        Write-Host "Installing WSL..."
-        Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
-        Enable-WindowsOptionalFeature -Online -FeatureName VirtualMachinePlatform
-    }
-    else
-    {
-        Write-Host "WSL is already installed."
-    }
-
-    Write-Host "Checking for Docker CLI..."
-    if (-Not (Get-Command docker -ErrorAction SilentlyContinue))
-    {
-        Write-Host "Installing Docker CLI..."
-        winget install --id Docker.DockerCli
-    }
-    else
-    {
-        Write-Host "Docker CLI is already installed."
-    }
-
-    Write-Host "Checking for Docker Compose..."
-    if (-Not (Get-Command docker-compose -ErrorAction SilentlyContinue))
-    {
-        Write-Host "Installing Docker Compose..."
-        winget install --id Docker.DockerCompose
-    }
-    else
-    {
-        Write-Host "Docker Compose is already installed."
-    }
+    Write-Output "Uninstallation complete. Please restart your computer to apply all changes."
 }
 
 # Display help menu
 function Show-Help
 {
-    Write-Host "Usage: .\ReinstallDockerCli.ps1 [-Uninstall] [-Install]"
+    Write-Host "Usage: .\DockerTools.ps1 [-Uninstall] [-Install]"
     Write-Host ""
     Write-Host "Options:"
     Write-Host "  -Uninstall                   Uninstall Docker CLI, Docker Desktop, Docker Compose, Wsl and it's containers."
     Write-Host "  -Install                     Install Docker CLI, Docker Desktop, and Docker Compose."
-    Write-Host "  -UninstallDocker             Uninstall Docker CLI, Docker Desktop, and Docker Compose."
-    Write-Host "  -UninstallWsl                Uninstall Wsl."
-    Write-Host "  -UninstallWslContainers      Uninstall Wsl Containers."
+    Write-Host "  -Clean                       Remove all containers, images, volumes and networks."
     Write-Host ""
     Write-Host "Example:"
-    Write-Host "  .\ReinstallDockerCli.ps1 -Uninstall"
-    Write-Host "  .\ReinstallDockerCli.ps1 -Install"
+    Write-Host "  .\DockerTools.ps1 -Uninstall"
+    Write-Host "  .\DockerTools.ps1 -Install"
+    Write-Host "  .\DockerTools.ps1 -Clean"
 }
 
 # Main script logic
 if ($Uninstall)
 {
-    Uninstall-DockerComponents
-    Uninstall-Wsl-Containers
-    Uninstall-Wsl
+    Uninstall
 }
 elseif ($Install)
 {
-    Install-DockerComponents
+    Install
 }
-elseif ($UninstallWsl)
+elseif ($Clean)
 {
-    Uninstall-Wsl
-}
-elseif ($UninstallWslContainers)
-{
-    Uninstall-Wsl-Containers
-}
-elseif ($UninstallDocker)
-{
-    Uninstall-DockerComponents
+    Clean
 }
 else
 {
