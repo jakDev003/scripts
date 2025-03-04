@@ -1,6 +1,53 @@
 ﻿# Define paths
 $composeDir = "C:\Users\jkagiwada\Git-Repos\run_env\compose"
 $dockerDir = "C:\Users\jkagiwada\Git-Repos\scripts\DockerContainers\buildev_work"
+$containerName = "buildev2"
+
+# Function to copy .ssh, .aws, and utils directory to home_dev
+function Copy-Directories {
+    $homeDevPath = "/home/dev"
+    $sshSource = "${env:USERPROFILE}\.ssh"
+    $awsSource = "${env:USERPROFILE}\.aws"
+    $gitSource = "${env:USERPROFILE}\.gitconfig"
+    $utilsSource = ".\home_dev"
+
+    # Check if the container exists and is running
+    try {
+        $containerStatus = docker inspect -f '{{.State.Running}}' $containerName
+        if ($containerStatus -ne "true") {
+            Write-Host "    ==> Container $containerName is not running. Please start the container first."
+            exit 1
+        }
+    }
+    catch {
+        Write-Host "    ==> Error inspecting the container. Please ensure Docker is running and the container exists."
+        exit 1
+    }
+
+    # Copy .ssh directory
+    docker cp $sshSource ${containerName}:${homeDevPath}
+
+    # Copy .gitconfig file
+    docker cp $gitSource ${containerName}:${homeDevPath}
+
+    # Copy .aws directory
+    docker cp $awsSource ${containerName}:${homeDevPath}
+
+    # Copy utils directory contents
+    Get-ChildItem -Path $utilsSource | ForEach-Object {
+        docker cp $_.FullName "${containerName}:${homeDevPath}"
+    }
+    Write-Host "    ==> Copied .ssh, .gitconfig, .aws, and utils to the Docker volume"
+
+    # Update permissions
+    docker exec $containerName sudo chown -R dev:dev ${homeDevPath}
+    docker exec $containerName sudo chmod -R 755 ${homeDevPath}
+    docker exec $containerName sudo chmod -R 700 ${homeDevPath}/.ssh
+    docker exec $containerName sudo chmod -R 700 ${homeDevPath}/.aws
+    docker exec $containerName sudo chmod 600 ${homeDevPath}/.gitconfig
+
+    Write-Host "    ==> Updated permissions"
+}
 
 # Check if paths exist
 if (-not (Test-Path $composeDir)) {
@@ -31,7 +78,6 @@ try {
 
 # Build Docker container if not found
 Write-Host "Checking if Docker container exists..." -ForegroundColor Green
-$containerName = "buildev2"
 $containerExists = docker ps -a --format "{{.Names}}" | Select-String -Pattern $containerName
 
 if (-not $containerExists) {
@@ -43,6 +89,7 @@ if (-not $containerExists) {
             exit 1
         }
         & ".\buildDocker.ps1"
+        Copy-Directories
     } catch {
         Write-Error "Failed to build Docker container: $_"
         exit 1
