@@ -29,20 +29,28 @@ try {
     Pop-Location
 }
 
-# Build Docker container
-Write-Host "Building Docker container..." -ForegroundColor Green
-Push-Location $dockerDir
-try {
-    if (-not (Test-Path ".\buildDocker.ps1")) {
-        Write-Error "buildDocker.ps1 script not found in Docker directory"
+# Build Docker container if not found
+Write-Host "Checking if Docker container exists..." -ForegroundColor Green
+$containerName = "buildev2"
+$containerExists = docker ps -a --format "{{.Names}}" | Select-String -Pattern $containerName
+
+if (-not $containerExists) {
+    Write-Host "Docker container not found. Building Docker container..." -ForegroundColor Green
+    Push-Location $dockerDir
+    try {
+        if (-not (Test-Path ".\buildDocker.ps1")) {
+            Write-Error "buildDocker.ps1 script not found in Docker directory"
+            exit 1
+        }
+        & ".\buildDocker.ps1"
+    } catch {
+        Write-Error "Failed to build Docker container: $_"
         exit 1
+    } finally {
+        Pop-Location
     }
-    & ".\buildDocker.ps1"
-} catch {
-    Write-Error "Failed to build Docker container: $_"
-    exit 1
-} finally {
-    Pop-Location
+} else {
+    Write-Host "Docker container already exists. Skipping build." -ForegroundColor Yellow
 }
 
 Write-Host "Devbox startup completed successfully" -ForegroundColor Green
