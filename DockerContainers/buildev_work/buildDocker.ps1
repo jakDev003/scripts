@@ -33,7 +33,7 @@ if (docker images -q $tagName)
     }
 
     # Check if the volumes exist, if not create them
-    $volumes = @("publi.vol", "trans.vol", "codev.vol", "home_dev.vol")
+    $volumes = @("publi.vol", "trans.vol", "home_dev.vol")
     foreach ($volume in $volumes)
     {
         if (-not (docker volume ls -q -f name=^$volume$))
@@ -50,8 +50,11 @@ if (docker images -q $tagName)
     }
 
     docker run -d -it --name buildev2 --network $CONTAINER_NETWORK -h devbuild --network-alias devbuild `
-    -e MAVEN_USERNAME=admin --rm -v "home_dev.vol:/home/$DEVBUILD_USER" -v "publi.vol:/publish" `
-    -v "trans.vol:/xfer" -v "codev.vol:/home/$DEVBUILD_USER/code" -p 1023:22 `
+    -e MAVEN_USERNAME=admin --rm  `
+    -v "home_dev.vol:/home/$DEVBUILD_USER" `
+    -v "publi.vol:/publish" `
+    -v "trans.vol:/xfer" `
+    -p 1023:22 `
     -v "C:\Users\$env:USERNAME\.ssh:/home/$DEVBUILD_USER/.ssh" `
     $tagName bash
 }
