@@ -49,14 +49,20 @@ if (docker images -q $tagName)
         $DEVBUILD_USER = "default_user" # Fallback to a default user if not found
     }
 
-    docker run -d -it --name buildev2 --network $CONTAINER_NETWORK -h devbuild --network-alias devbuild `
+    $containerId = $(docker run -d -it --name buildev2 --network $CONTAINER_NETWORK -h devbuild --network-alias devbuild `
     -e MAVEN_USERNAME=admin --rm  `
     -v "home_dev.vol:/home/$DEVBUILD_USER" `
     -v "publi.vol:/publish" `
     -v "trans.vol:/xfer" `
     -p 1023:22 `
     -v "C:\Users\$env:USERNAME\.ssh:/home/$DEVBUILD_USER/.ssh" `
-    $tagName bash
+    $tagName bash)
+
+    # Copy contents of home_dev directory to the container
+    Write-Host "Copying contents of home_dev to the container"
+    docker cp "DockerContainers/buildev_work/home_dev/." "${containerId}:/home/$DEVBUILD_USER"
+
+    Write-Host "Container started and files copied successfully."
 }
 else
 {
