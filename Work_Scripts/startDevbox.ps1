@@ -34,9 +34,10 @@ function Copy-Directories {
     docker cp $awsSource ${containerName}:${homeDevPath}
 
     # Copy utils directory contents
-    Get-ChildItem -Path $utilsSource | ForEach-Object {
-        docker cp $_.FullName "${containerName}:${homeDevPath}"
-    }
+    docker cp $utilsSource\data.mk ${containerName}:${homeDevPath}
+    docker cp $utilsSource\var.mk ${containerName}:${homeDevPath}
+    docker cp $utilsSource\Makefile ${containerName}:${homeDevPath}
+    docker cp $utilsSource\.bashrc ${containerName}:${homeDevPath}
     Write-Host "    ==> Copied .ssh, .gitconfig, .aws, and utils to the Docker volume"
 
     # Update permissions
