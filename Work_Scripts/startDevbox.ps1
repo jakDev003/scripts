@@ -1,6 +1,6 @@
 ﻿# Define paths
 $composeDir = "C:\Users\jkagiwada\Git-Repos\run_env\compose"
-$dockerDir = "C:\Users\jkagiwada\Git-Repos\scripts\DockerContainers\buildev_work"
+$dockerDir = "C:\Users\jkagiwada\Git-Repos\build_dev\docker"
 $containerName = "buildev2"
 
 # Function to copy .ssh, .aws, and utils directory to home_dev
@@ -14,7 +14,7 @@ function Copy-Directories {
     # Check if the container exists and is running
     try {
         $containerStatus = docker inspect -f '{{.State.Running}}' $containerName
-        if ($containerStatus -ne "true") {
+        if ($containerstatus -ne "true") {
             Write-Host "    ==> Container $containerName is not running. Please start the container first."
             exit 1
         }
@@ -78,27 +78,33 @@ try {
 }
 
 # Build Docker container if not found
-Write-Host "Checking if Docker container exists..." -ForegroundColor Green
-$containerExists = docker ps -a --format "{{.Names}}" | Select-String -Pattern $containerName
+Write-Host "Starting buildev2 environment..." -ForegroundColor Green
+# Build Docker container if not found
+try {
+   cd $dockerDir
+    docker build -t buildev2:latest .
 
-if (-not $containerExists) {
-    Write-Host "Docker container not found. Building Docker container..." -ForegroundColor Green
-    Push-Location $dockerDir
-    try {
-        if (-not (Test-Path ".\buildDocker.ps1")) {
-            Write-Error "buildDocker.ps1 script not found in Docker directory"
-            exit 1
-        }
-        & ".\buildDocker.ps1"
-        Copy-Directories
-    } catch {
-        Write-Error "Failed to build Docker container: $_"
-        exit 1
-    } finally {
-        Pop-Location
-    }
-} else {
-    Write-Host "Docker container already exists. Skipping build." -ForegroundColor Yellow
+    # Run command
+    docker run -d `
+      --name buildev2 `
+      --hostname devbuild2 `
+      --network a360i `
+      --memory="1g" `
+      --cpus="0.3" `
+      -e MAVEN_USERNAME=admin `
+      -v home_dev.vol:/home/dev `
+      -v publi.vol:/publish `
+      -v trans.vol:/xfer `
+      --restart unless-stopped `
+      117076844353.dkr.ecr.us-east-2.amazonaws.com/devbuild:0.1.4 `
+      /bin/sh -c "sudo chmod 777 /node-v16.19.1-linux-x64/ -R && sudo chown `$USER:`$USER . -R && tail -f /dev/null"
+    Write-Host "Devbox startup completed successfully" -ForegroundColor Green
+} catch {
+    Write-Error "Failed to build and run Docker container: $_"
+    exit 1
 }
 
 Write-Host "Devbox startup completed successfully" -ForegroundColor Green
+
+
+Pause
