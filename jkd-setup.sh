@@ -13,6 +13,12 @@ fi
 echo "Please enter a password for the 'josh' user:"
 read -s password
 
+# Prompt the user for new hostname (what the computer will be called)
+echo "Please enter a new hostname:"
+read -s new_hostname
+
+hostnamectl set_hostname $new_hostname
+
 # Create the 'josh' user with a home directory and bash shell
 useradd -m -s /bin/bash josh
 
