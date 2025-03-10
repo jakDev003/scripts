@@ -15,7 +15,7 @@ read -s password
 
 # Prompt the user for new hostname (what the computer will be called)
 echo "Please enter a new hostname:"
-read -s new_hostname
+read new_hostname
 
 hostnamectl set_hostname $new_hostname
 
