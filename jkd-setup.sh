@@ -17,7 +17,7 @@ read -s password
 echo "Please enter a new hostname:"
 read new_hostname
 
-hostnamectl set_hostname $new_hostname
+hostnamectl set-hostname $new_hostname
 
 # Create the 'josh' user with a home directory and bash shell
 useradd -m -s /bin/bash josh
