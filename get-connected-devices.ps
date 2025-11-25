@@ -1,0 +1,10 @@
+# Shows IP, MAC address, and resolves hostnames when possible
+
+Get-NetNeighbor -AddressFamily IPv4 | Select-Object IPAddress, LinkLayerAddress,     @{Name="Hostname";Expression={try{[System.Net.Dns]::GetHostEntry($_.IPAddress).HostName}catch{$null}}},     State | Sort-Object IPAddress | Format-Table -AutoSize
+
+Or
+
+# Scans your current subnet (e.g., 192.168.1.0/24) – adjusts automatically
+
+$subnet = (Get-NetIPConfiguration | Where-Object {$_.IPv4DefaultGateway -ne \( null}).IPv4Address.IPAddress -replace "\.\d+ \)","."
+1..254 | ForEach-Object -Parallel {    $ip = "$using:subnet.$_"    if (Test-Connection -ComputerName $ip -Count 1 -Quiet -ErrorAction SilentlyContinue) {        $mac = (arp -a $ip | Select-String "dynamic") -replace ".* (..-..-..-..-..-..) .*",'$1'        $host = try{[System.Net.Dns]::GetHostEntry($ip).HostName}catch{$null}        [PSCustomObject]@{            IP       = $ip            Hostname = $host            MAC      = $mac            Status   = "Online"        }    }} | Format-Table -AutoSize
